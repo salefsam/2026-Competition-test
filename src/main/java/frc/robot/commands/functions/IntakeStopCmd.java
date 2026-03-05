@@ -16,5 +16,10 @@ public class IntakeStopCmd extends Command {
         intakeSys.stop();
     }
 
+    @Override
+    public boolean isFinished() {
+        return true;
+    }
+
 
 }

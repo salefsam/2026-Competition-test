@@ -23,7 +23,6 @@ public class IntakeCmd extends Command {
 
     @Override
     public void execute() {
-        System.out.println(intakeSys.getRollerRPM());
 
         // if (direction == 1){
         //     intakeSys.setRollerRPM(RollerConstants.rollerRPM*direction);    

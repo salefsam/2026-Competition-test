@@ -70,7 +70,6 @@ public class RobotContainer {
         // Register Commands to PathPlanner
         NamedCommands.registerCommand("Aim", new AutoAimCmd(swerveSys));
         NamedCommands.registerCommand("Shoot", new AutoShootCmd(shooterSys));
-        NamedCommands.registerCommand("Intake", new IntakeCmd(intakeSys));
         NamedCommands.registerCommand("Agitate", new AutoAgitatorCmd(agitatorSys));
 
         // Build an auto chooser. This will use Commands.none() as the default option.
@@ -93,8 +92,8 @@ public class RobotContainer {
     // pointCmd already requires the lightweight rotation subsystem. No need to add SwerveSys requirement.
             
 
-        new EventTrigger("Aim").onTrue(new IntakeCmd(intakeSys));
-        new EventTrigger("Aim").onFalse(new IntakeStopCmd(intakeSys));
+        new EventTrigger("Intake2").onTrue(new IntakeCmd(intakeSys));
+        new EventTrigger("Intake2").onFalse(new IntakeStopCmd(intakeSys));
 
 
         configDriverBindings();

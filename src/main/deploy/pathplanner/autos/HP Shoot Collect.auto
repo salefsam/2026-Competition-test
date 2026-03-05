@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Example Path"
+            "pathName": "Start-Outpost"
           }
         },
         {
@@ -19,25 +19,38 @@
         {
           "type": "path",
           "data": {
-            "pathName": "New Path"
+            "pathName": "Outpost-Hub"
           }
         },
         {
-          "type": "wait",
+          "type": "parallel",
           "data": {
-            "waitTime": 10.0
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Agitate"
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "New New Path"
+            "pathName": "Hub-ThroughTrench"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "New New New Path"
+            "pathName": "Collect"
           }
         }
       ]
