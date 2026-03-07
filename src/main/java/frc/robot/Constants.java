@@ -201,8 +201,8 @@ public class Constants {
         public static final double rollerkD = 0;
 
     
-        public static final int stallLimitAmps = 80;
-        public static final int freeLimitAmps = 80;
+        public static final int stallLimitAmps = 120;
+        public static final int freeLimitAmps = 120;
         public static final int maxRPM = 6784;
 
     }

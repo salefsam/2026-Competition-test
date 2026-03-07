@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start-Outpost2"
+            "pathName": "ExtraMove"
           }
         },
         {
@@ -23,22 +23,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "wait",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Agitate"
-                }
-              }
-            ]
+            "waitTime": 10.0
           }
         },
         {

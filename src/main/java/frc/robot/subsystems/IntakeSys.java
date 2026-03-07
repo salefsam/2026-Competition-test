@@ -48,8 +48,8 @@ public class IntakeSys extends SubsystemBase {
      * Sets the roller motor to the specified RPM. Positive RPMs should intake balls, while negative RPMs should outtake balls.
      * @param rpm
      */
-    public void setRollerRPM(double rpm) {
-        rollerController.setSetpoint(rpm, ControlType.kVelocity);
+    public void setRollerRPM(double speed) {
+        rollerMtr.set(speed);
     }
 
     /**
@@ -67,4 +67,12 @@ public class IntakeSys extends SubsystemBase {
         rollerController.setSetpoint(0, ControlType.kVelocity);
     }
     
+    public double getIntakeAmps() {
+        return rollerMtr.getOutputCurrent();
+    }
+
+    public double getIntakeTemp() {
+        return rollerMtr.getMotorTemperature();
+    }
+
 }

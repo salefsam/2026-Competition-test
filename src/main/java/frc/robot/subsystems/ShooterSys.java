@@ -99,7 +99,6 @@ public class ShooterSys extends SubsystemBase {
               this));
 
 
-    
     public void setShooterRPM(double rpm) {
         shooterController.setSetpoint(rpm, ControlType.kVelocity);
     }
@@ -184,7 +183,7 @@ public class ShooterSys extends SubsystemBase {
 
     public double desiredRPM() {
 
-        return 4575;
+        return 3900;
 
     }
 

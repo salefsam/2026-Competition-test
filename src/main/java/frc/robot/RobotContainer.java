@@ -82,8 +82,8 @@ public class RobotContainer {
         testCmd = new AutoShootCmd(shooterSys);
         autoPointCmd = new AutoAimCmd(swerveSys);
         runShooterFFCmd = new RunShooterFFCmd(shooterSys);
-        intakeCmd = new IntakeCmd(intakeSys);
-        agitatorCmd = new AgitatorCmd(agitatorSys);
+        intakeCmd = new IntakeCmd(intakeSys, false);
+        agitatorCmd = new AgitatorCmd(agitatorSys, false);
         aimToHubCmd = new AimToHubCmd(swerveSys);
         intakeStopCmd = new IntakeStopCmd(intakeSys);
         autoAgitatorCmd = new AutoAgitatorCmd(agitatorSys);
@@ -92,7 +92,7 @@ public class RobotContainer {
     // pointCmd already requires the lightweight rotation subsystem. No need to add SwerveSys requirement.
             
 
-        new EventTrigger("Intake2").onTrue(new IntakeCmd(intakeSys));
+        new EventTrigger("Intake2").onTrue(new IntakeCmd(intakeSys, false));
         new EventTrigger("Intake2").onFalse(new IntakeStopCmd(intakeSys));
 
 
@@ -102,11 +102,11 @@ public class RobotContainer {
     }
 
     private void configOperatorBindings() {
-    operatorController.b().whileTrue(new AgitatorCmd(agitatorSys));
-    operatorController.leftTrigger().whileTrue(new IntakeCmd(intakeSys));
-    //operatorController.leftTrigger().whileTrue(new IntakeCmd(intakeSys, 1)); //a plus 1 should make it run forwards
+    operatorController.b().whileTrue(new AgitatorCmd(agitatorSys, false));
+    operatorController.a().whileTrue(new AgitatorCmd(agitatorSys, true));
+    operatorController.leftTrigger().whileTrue(new IntakeCmd(intakeSys, false));
+    operatorController.leftBumper().whileTrue(new IntakeCmd(intakeSys, true));
     operatorController.rightTrigger().whileTrue(new RunShooterFFCmd(shooterSys));
-    //operatorController.leftBumper().whileTrue(new IntakeCmd(intakeSys, -1)); //a negative 1 should make this run backwards
     }
 
     public void configDriverBindings() {
@@ -164,6 +164,8 @@ public class RobotContainer {
         SmartDashboard.putNumber("Limelight TY", LimelightHelpers.getTY(VisionConstants.LimelightName));
 
         SmartDashboard.putNumberArray("Pose in Target Space", LimelightHelpers.getBotPose_TargetSpace(VisionConstants.LimelightName));
+        SmartDashboard.putNumber("IntakeAmps", intakeSys.getIntakeAmps());
+        SmartDashboard.putNumber("IntakeTemp", intakeSys.getIntakeTemp());
 
     }   
 }

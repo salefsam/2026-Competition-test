@@ -7,33 +7,23 @@ import frc.robot.Constants.RollerConstants;
 public class IntakeCmd extends Command {
 
     private final IntakeSys intakeSys;
-    //private final int direction;
+    private final boolean reverse;
     
-     public IntakeCmd(IntakeSys intakeSys) {
-         this.intakeSys = intakeSys;
+     public IntakeCmd(IntakeSys intakeSys, boolean reverse) {
+        this.intakeSys = intakeSys;
+        this.reverse = reverse;
     }
-
-    //  public IntakeCmd(IntakeSys intakeSys, int direction) {
-    //      this.intakeSys = intakeSys;
-    //      this.direction = direction;
-    //  }
 
     @Override
     public void initialize() {}
 
     @Override
     public void execute() {
-
-        // if (direction == 1){
-        //     intakeSys.setRollerRPM(RollerConstants.rollerRPM*direction);    
-        // }
-        // else {
-        //     intakeSys.setRollerRPM(RollerConstants.rollerRPM*direction);
-        // }
-        
-        //In theory we can just use this:
-        //intakeSys.setRollerRPM(RollerConstants.rollerRPM * direction);
-        intakeSys.setRollerRPM(RollerConstants.rollerRPM);
+        if(reverse == true){
+            intakeSys.setRollerRPM(-0.18);
+        }else{
+            intakeSys.setRollerRPM(0.18);
+        }
     }
 
     @Override

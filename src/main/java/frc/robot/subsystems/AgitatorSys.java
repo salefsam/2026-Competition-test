@@ -19,6 +19,7 @@ public class AgitatorSys extends SubsystemBase {
         agitatorMtr = new SparkMax(CANDevices.agitatorMtrId, MotorType.kBrushless);
         agitatorEnc = agitatorMtr.getEncoder();
 
+
         SparkMaxConfig agitatorConfig = new SparkMaxConfig();
         agitatorConfig
             .inverted(false)
@@ -33,8 +34,12 @@ public class AgitatorSys extends SubsystemBase {
     /**
      * Sets the agitator motor to the specified RPM. Positive RPMs should intake balls, while negative RPMs should outtake balls.
      */
-    public void setAgitatorRPM() {
-        agitatorMtr.set(0.45);
+    public void setAgitatorRPM(boolean reverse) {
+        if(reverse == true) {
+            agitatorMtr.set(-0.45);
+        }else{
+            agitatorMtr.set(0.45);
+        }
     }
 
     /** Returns the current RPM of the agitator motor. */

@@ -6,15 +6,20 @@ import frc.robot.subsystems.AgitatorSys;
 public class AgitatorCmd extends Command {
 
     private final AgitatorSys agitatorSys;
+    private final boolean reverse;
 
-    public AgitatorCmd(AgitatorSys agitatorSys) {
+    public AgitatorCmd(AgitatorSys agitatorSys, boolean reverse) {
         this.agitatorSys = agitatorSys;
+        this.reverse = reverse;
     }
 
     @Override
     public void execute() {
-        agitatorSys.setAgitatorRPM();
-        agitatorSys.getAgitatorRPM();
+        if(reverse == true){
+            agitatorSys.setAgitatorRPM(true);
+        }else{
+            agitatorSys.setAgitatorRPM(false);
+        }
     }
 
     @Override

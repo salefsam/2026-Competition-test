@@ -23,7 +23,7 @@ public class AutoAgitatorCmd extends Command {
 
     @Override
     public void execute() {
-        agitatorSys.setAgitatorRPM();
+        agitatorSys.setAgitatorRPM(false);
     }
 
     @Override
