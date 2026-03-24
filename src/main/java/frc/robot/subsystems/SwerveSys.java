@@ -34,6 +34,11 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 
 public class SwerveSys extends SubsystemBase {
+    public enum DriveMode {
+        ROBOT_ORIENTED,
+        FIELD_ORIENTED,
+        LOCKED
+    }
 
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
     NetworkTableEntry tx = table.getEntry("tx");
@@ -551,4 +556,22 @@ public class SwerveSys extends SubsystemBase {
         backLeftMod.setDriveCurrentLimit(amps);
         backRightMod.setDriveCurrentLimit(amps);
     }*/
+
+    public DriveMode getCurrentMode() {
+        if (isLocked) {
+            return DriveMode.LOCKED;
+        } else if (isFieldOriented) {
+            return DriveMode.FIELD_ORIENTED;
+        } else {
+            return DriveMode.ROBOT_ORIENTED;
+        }
+    }
+
+    public void setCurrentMode(DriveMode mode) {
+        switch(mode) {
+            case LOCKED: isLocked = true; isFieldOriented = false; break;
+            case FIELD_ORIENTED: isLocked = false; isFieldOriented = true; break;
+            case ROBOT_ORIENTED: isLocked = false; isFieldOriented = false; break;
+        }
+    }
 }

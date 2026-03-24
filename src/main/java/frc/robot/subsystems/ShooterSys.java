@@ -186,6 +186,13 @@ public class ShooterSys extends SubsystemBase {
 
     }
 
+    /** 
+     * Returns true if the shooter RPM is within tolerance of the desired RPM. 
+     */
+    public boolean atSetpoint() {
+        double error = Math.abs(getShooterRPM() - desiredRPM());
+        return error <= ShooterConstants.SHOOTER_RPM_TOLERANCE;
+    }
     @Override
     public void periodic() {
 

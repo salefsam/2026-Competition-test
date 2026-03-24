@@ -9,110 +9,135 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import frc.robot.Constants.CANDevices;
-import frc.robot.Constants.ControllerConstants;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.VisionConstants;
-import frc.robot.subsystems.SwerveSys;
-import frc.robot.util.limelight.LimelightHelpers;
-import frc.robot.subsystems.SwerveRotation;
-import frc.robot.subsystems.AgitatorSys;
-import frc.robot.subsystems.ShooterSys;
-import frc.robot.subsystems.IntakeSys;
+import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.subsystems.*;
+import frc.robot.Constants.*;
+import frc.robot.commands.drivetrain.*;
+import frc.robot.commands.functions.*;
+import frc.robot.commands.functions.AgitatorCmd.AgitateForwardCmd;
+import frc.robot.commands.functions.AgitatorCmd.AgitateLongCmd;
+import frc.robot.commands.functions.AgitatorCmd.AgitateReverseCmd;
+import frc.robot.commands.functions.AgitatorCmd.AgitateShortCmd;
+import frc.robot.commands.functions.AgitatorCmd.AgitateStopCmd;
+import frc.robot.commands.functions.IntakeCommands.IntakeInCmd;
+import frc.robot.commands.functions.IntakeCommands.IntakeOutCmd;
+import frc.robot.commands.functions.IntakeCommands.IntakeStopCmd;
+//import frc.robot.commands.lights.*;
+//import frc.robot.util.*;
+//import frc.robot.util.led.*;
+import frc.robot.util.limelight.*;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 
-import frc.robot.commands.drivetrain.ArcadeDriveCmd;
-import frc.robot.commands.drivetrain.LockCmd;
-import frc.robot.commands.drivetrain.PointCmd;
-import frc.robot.commands.drivetrain.AimToHubCmd;
-import frc.robot.commands.functions.AgitatorCmd;
-import frc.robot.commands.functions.AutoAimCmd;
-import frc.robot.commands.functions.AutoShootCmd;
-import frc.robot.commands.functions.IntakeCmd;
-import frc.robot.commands.functions.IntakeStopCmd;
-import frc.robot.commands.functions.RunShooterFFCmd;
-import frc.robot.commands.functions.AutoAgitatorCmd;
-
+//This is the brains of our robot
+//We should Instantiate subsystems, set default commands, bind buttons, and provide autonomous commands
+//We should not put logic or motor controls in here
 public class RobotContainer {
     
-    // Initialize subsystems.
+    // Instantiate subsystems
+    //drivetrain - Can we combine SwerveSys with SwerveRotation?
     private final SwerveSys swerveSys = new SwerveSys();
     private final SwerveRotation swerveRotation = new SwerveRotation(swerveSys);
     private final ShooterSys shooterSys = new ShooterSys(swerveSys);
     private final IntakeSys intakeSys = new IntakeSys();
     private final AgitatorSys agitatorSys = new AgitatorSys();
 
-    //Initialize joysticks.
+    //Named / Reusable Commands
+    private AutoShootCmd testCmd;
+    private PointCmd pointCmd;
+    private AutoAimCmd autoPointCmd;
+    private AimToHubCmd aimToHubCmd;
+    private RunShooterFFCmd runShooterFFCmd;
+    private AgitatorCmd.AgitateForwardCmd agitateForwardCmd;
+    private AgitatorCmd.AgitateReverseCmd agitateReverseCmd;
+    private AgitatorCmd.AgitateLongCmd agitateLongCmd;
+    private AgitatorCmd.AgitateShortCmd agitateShortCmd;
+    private AgitatorCmd.AgitateStopCmd agitateStopCmd;
+    private IntakeInCmd intakeInCmd;
+    private IntakeOutCmd intakeOutCmd;
+    private IntakeStopCmd intakeStopCmd;
+
+    //Instantiate Controllers
     public final static CommandXboxController driverController = new CommandXboxController(ControllerConstants.driverGamepadPort);
     public final static CommandXboxController operatorController = new CommandXboxController(ControllerConstants.operatorGamepadPort);
-
-    //Name Commands
-    PointCmd pointCmd;
-    AutoShootCmd testCmd;
-    AutoAimCmd autoPointCmd;
-    RunShooterFFCmd runShooterFFCmd;
-    IntakeCmd intakeCmd;
-    AgitatorCmd agitatorCmd;
-    AimToHubCmd aimToHubCmd;
-    IntakeStopCmd intakeStopCmd;
-    AutoAgitatorCmd autoAgitatorCmd;
-
-    //Initialize auto selector.
-    SendableChooser<Command> autoSelector = new SendableChooser<Command>();
 
     //PDH
     private final PowerDistribution pdh = new PowerDistribution(CANDevices.pdhId, ModuleType.kRev);
 
-    public RobotContainer() {
-        RobotController.setBrownoutVoltage(DriveConstants.brownoutVoltage);
+    private SendableChooser<Command> autoSelector;
 
-        // Register Commands to PathPlanner
+    //Shuffleboard
+    // in RobotContainer.java
+    private final ShuffleboardTab driverTab = Shuffleboard.getTab("Driver");
+    private final ShuffleboardTab operatorTab = Shuffleboard.getTab("Operator");
+    private final ShuffleboardTab drivetrainTab = Shuffleboard.getTab("Drivetrain");
+    private final ShuffleboardTab systemTab = Shuffleboard.getTab("System");
+
+    // Drivetrain layout
+    private final ShuffleboardLayout drivetrainLayout = drivetrainTab.getLayout("Drivetrain", BuiltInLayouts.kGrid)
+    .withSize(4, 2)
+    .withPosition(0, 0);
+    private final ShuffleboardLayout operatorLayout = operatorTab.getLayout("Operator", BuiltInLayouts.kGrid)
+    .withSize(4,2)
+    .withPosition(0,0);
+    private final ShuffleboardLayout driverLayout = driverTab.getLayout("Driver", BuiltInLayouts.kGrid)
+    .withSize(4,2)
+    .withPosition(0, 0);
+    private final ShuffleboardLayout systemLayout = systemTab.getLayout("System Health", BuiltInLayouts.kGrid)
+    .withSize(4,2)
+    .withPosition(0, 0);
+
+
+    //Constructor
+    public RobotContainer() {
+        //initialize reusable commands first        
+        //aim
+        testCmd = new AutoShootCmd(shooterSys, 10);
+        pointCmd = new PointCmd(swerveRotation);
+        autoPointCmd = new AutoAimCmd(swerveSys);
+        aimToHubCmd = new AimToHubCmd(swerveSys);
+        //shoot
+        runShooterFFCmd = new RunShooterFFCmd(shooterSys);
+        //agitate
+        agitateForwardCmd = new AgitateForwardCmd(agitatorSys);
+        agitateReverseCmd = new AgitateReverseCmd(agitatorSys);
+        agitateLongCmd = new AgitateLongCmd(agitatorSys);
+        agitateShortCmd = new AgitateShortCmd(agitatorSys);
+        agitateStopCmd = new AgitateStopCmd(agitatorSys);
+        //intake
+        intakeStopCmd = new IntakeStopCmd(intakeSys);
+        
+
+        //Register named commands to PathPlanner
         NamedCommands.registerCommand("Aim", new AutoAimCmd(swerveSys));
-        NamedCommands.registerCommand("Shoot", new AutoShootCmd(shooterSys, 10));
-        NamedCommands.registerCommand("Shoot2Sec", new AutoShootCmd(shooterSys, 2.5));
-        NamedCommands.registerCommand("Agitate", new AutoAgitatorCmd(agitatorSys, 10));
-        NamedCommands.registerCommand("Agitate2Sec", new AutoAgitatorCmd(agitatorSys, 2.5));
+        NamedCommands.registerCommand("Shoot", new ShootLongCmd(shooterSys));
+        NamedCommands.registerCommand("Shoot2Sec", new ShootShortCmd(shooterSys));
+        NamedCommands.registerCommand("Agitate", new AgitateLongCmd(agitatorSys));
+        NamedCommands.registerCommand("Agitate2Sec", new AgitateShortCmd(agitatorSys));
+
+        //configure defaults
+        configureDefaultCommands();
+        configureButtonBindings();
 
         // Build an auto chooser. This will use Commands.none() as the default option.
+        //and add to dashboard
         autoSelector = AutoBuilder.buildAutoChooser();
-
         SmartDashboard.putData("auto select", autoSelector);
-
-        //Initalize Commands
-        pointCmd = new PointCmd(swerveRotation);
-        testCmd = new AutoShootCmd(shooterSys, 0);
-        autoPointCmd = new AutoAimCmd(swerveSys);
-        runShooterFFCmd = new RunShooterFFCmd(shooterSys);
-        intakeCmd = new IntakeCmd(intakeSys, false);
-        agitatorCmd = new AgitatorCmd(agitatorSys, false);
-        aimToHubCmd = new AimToHubCmd(swerveSys);
-        intakeStopCmd = new IntakeStopCmd(intakeSys);
-        autoAgitatorCmd = new AutoAgitatorCmd(agitatorSys, 0);
-            
-
-        new EventTrigger("Intake2").onTrue(new IntakeCmd(intakeSys, false));
-        new EventTrigger("Intake2").onFalse(new IntakeStopCmd(intakeSys));
-
-
-        configDriverBindings();
-        configOperatorBindings();
-
+        
+        //setup event triggers
+        EventTrigger intake2 = new EventTrigger("Intake2");
+        intake2.onTrue(new IntakeInCmd(intakeSys));
+        intake2.onFalse(new IntakeStopCmd(intakeSys));
     }
 
-    private void configOperatorBindings() {
-    operatorController.b().whileTrue(new AgitatorCmd(agitatorSys, false));
-    operatorController.a().whileTrue(new AgitatorCmd(agitatorSys, true));
-    operatorController.leftTrigger().whileTrue(new IntakeCmd(intakeSys, false));
-    operatorController.leftBumper().whileTrue(new IntakeCmd(intakeSys, true));
-    //operatorController.x().whileTrue(new RunShooterFFCmd(shooterSys, 3000));
-    operatorController.rightTrigger().whileTrue(new RunShooterFFCmd(shooterSys/* , shooterSys.getShooterRPM()*/));
-    }
-
-    public void configDriverBindings() {
+    private void configureDefaultCommands() {
         swerveSys.setDefaultCommand(new ArcadeDriveCmd(
             () -> MathUtil.applyDeadband(driverController.getLeftY(), ControllerConstants.joystickDeadband),
             () -> MathUtil.applyDeadband(driverController.getLeftX(), ControllerConstants.joystickDeadband),
@@ -120,7 +145,15 @@ public class RobotContainer {
             true,
             true,
             swerveSys));
+        //agitator idle command
+        //agitatorSys.setDefaultCommand(new AgitatorIdleCmd(agitatorSys));
 
+        //shooter idle command
+        //shooterSys.setDefaultCommand(new ShooterIdleCmd(shooterSys));
+    }
+
+    private void configureButtonBindings() {
+        //Driver
         driverController.start().onTrue(Commands.runOnce(() -> swerveSys.resetHeading()));
 
         //Swerve locking system
@@ -128,17 +161,70 @@ public class RobotContainer {
            .whileTrue(new LockCmd(swerveSys));
 
         driverController.rightTrigger().whileTrue(aimToHubCmd);
+
+        //Operator
+        operatorController.b().whileTrue(new AgitatorCmd.AgitateReverseCmd(agitatorSys));
+        operatorController.a().whileTrue(new AgitatorCmd.AgitateForwardCmd(agitatorSys));
+        operatorController.leftTrigger().whileTrue(new IntakeInCmd(intakeSys));
+        operatorController.leftBumper().whileTrue(new IntakeOutCmd(intakeSys));
+        operatorController.rightTrigger().whileTrue(new RunShooterFFCmd(shooterSys));
     }
 
-    public Command getAutonomousCommand() {
-        return autoSelector.getSelected();
-    } 
+     public Command getAutonomousCommand() {
+         //return new ExampleAutoCommand(drivetrain, shooter, agitator, intake);
+         return autoSelector.getSelected();
+     }
 
     // For uniformity, any information sent to Shuffleboard/SmartDashboard should go here.
-    public void updateInterface() {
+    public void updateDashboard() {
+
+        //Operator
+        operatorLayout.addNumber(null, null);
+        operatorLayout.addNumber(null, null);
+        operatorLayout.addNumber(null, null);
+        operatorLayout.addNumber(null, null);
+        operatorLayout.addNumber(null, null);
+        operatorLayout.addNumber(null, null);
+        operatorLayout.addNumber(null, null);
+        operatorLayout.addNumber(null, null);
+        operatorLayout.addNumber(null, null);
+        operatorLayout.addNumber(null, null);
+        operatorLayout.addNumber(null, null);
+        SmartDashboard.putNumber("IntakeAmps", intakeSys.getIntakeAmps());
+        SmartDashboard.putNumber("IntakeTemp", intakeSys.getIntakeTemp());
+        SmartDashboard.putNumber("Shooter RPM", shooterSys.getShooterRPM());
+        SmartDashboard.putNumber("Desired Shooter RPM", shooterSys.desiredRPM());
+        SmartDashboard.putNumber("ShooterError", shooterSys.desiredRPM() - shooterSys.getShooterRPM());
+        SmartDashboard.putNumber("Limelight TY", LimelightHelpers.getTY(VisionConstants.LimelightName));
+        SmartDashboard.putNumber("DistanceToCenterHub", shooterSys.getPlanarDistanceToHubMeters());
+        SmartDashboard.putBoolean("Is Aiming", aimToHubCmd.isScheduled());
+        SmartDashboard.putBoolean("Vision Locked", LimelightHelpers.getTV(VisionConstants.LimelightName));
+        SmartDashboard.putBoolean("Shooter Running", runShooterFFCmd.isScheduled());
+        SmartDashboard.putBoolean("READY TO SHOOT", shooterSys.atSetpoint());
+
+        //Driver
+        driverLayout.addNumber(null, null);
+        SmartDashboard.putNumber("DistanceToCenterHub", shooterSys.getPlanarDistanceToHubMeters());
+        SmartDashboard.putString("Drive Mode", swerveSys.getCurrentMode().name());
+        SmartDashboard.putBoolean("Is Aiming", aimToHubCmd.isScheduled());
+        SmartDashboard.putBoolean("Vision Locked", LimelightHelpers.getTV(VisionConstants.LimelightName));
+        SmartDashboard.putNumber("Pose Rotation", swerveSys.getPose().getRotation().getDegrees());
+        SmartDashboard.putBoolean("Auto Aim Active", autoPointCmd.isScheduled());
+
+        //System
+        systemLayout.addNumber("Drive Voltage", () -> swerveSys.getAverageDriveVoltage());
+        systemLayout.addNumber("Current Draw", () -> pdh.getTotalCurrent());
+        systemLayout.addNumber("Battery Voltage", () -> RobotController.getBatteryVoltage());
         
-        SmartDashboard.putNumber("heading degrees", swerveSys.getHeading().getDegrees());
-        SmartDashboard.putNumber("speed m/s", swerveSys.getAverageDriveVelocityMetersPerSec());
+
+        //DriveTrain
+        drivetrainLayout.addNumber("FL Speed", () -> swerveSys.getModuleStates()[0].speedMetersPerSecond);
+        drivetrainLayout.addNumber("FR Speed", () -> swerveSys.getModuleStates()[1].speedMetersPerSecond);
+        drivetrainLayout.addNumber("BL Speed", () -> swerveSys.getModuleStates()[2].speedMetersPerSecond);
+        drivetrainLayout.addNumber("BR Speed", () -> swerveSys.getModuleStates()[3].speedMetersPerSecond);
+        drivetrainLayout.addNumber("Heading", () -> swerveSys.getHeading().getDegrees());
+        drivetrainLayout.addNumber("Speed m/s", () -> swerveSys.getAverageDriveVelocityMetersPerSec());
+        
 
         SmartDashboard.putNumber("pose x meters", swerveSys.getPose().getX());
         SmartDashboard.putNumber("pose y meters", swerveSys.getPose().getY());
@@ -160,22 +246,7 @@ public class RobotContainer {
         SmartDashboard.putNumber("BL offset CANCoder degrees", swerveSys.getCanCoderAngles()[2].getDegrees() - DriveConstants.backLeftModOffset.getDegrees());
         SmartDashboard.putNumber("BR offset CANCoder degrees", swerveSys.getCanCoderAngles()[3].getDegrees() - DriveConstants.backRightModOffset.getDegrees());
 
-        SmartDashboard.putNumber("drive voltage", swerveSys.getAverageDriveVoltage());
-
-        SmartDashboard.putNumber("Shooter RPM", shooterSys.getShooterRPM());
-        SmartDashboard.putNumber("Desired Shooter RPM", shooterSys.desiredRPM());
-        SmartDashboard.putNumber("Limelight TY", LimelightHelpers.getTY(VisionConstants.LimelightName));
-
-        SmartDashboard.putNumber("IntakeAmps", intakeSys.getIntakeAmps());
-        SmartDashboard.putNumber("IntakeTemp", intakeSys.getIntakeTemp());
-
-        SmartDashboard.putNumber("DistanceToCenterHub", shooterSys.getPlanarDistanceToHubMeters());
-        SmartDashboard.putNumber("Current Draw", pdh.getTotalCurrent());
-
         SmartDashboard.putNumber("Speed X", swerveSys.getFieldRelativeVelocity().getX());
         SmartDashboard.putNumber("Speed Y", swerveSys.getFieldRelativeVelocity().getY());
-
-        //SmartDashboard.putNumber("Accel X", swerveSys.getAcceleration());
-
     }   
 }

@@ -10,6 +10,11 @@ import edu.wpi.first.wpilibj.util.Color;
 
 public class Constants {
 
+    public static final class RobotConstants {
+        public static final int driveCurrentLimitAmps = 70;
+        public static final double brownoutVoltage = 6.25;
+    }
+
     public static final class ButtonPanelConstants {
         
     }
@@ -138,10 +143,6 @@ public class Constants {
         public static final Rotation2d frontRightModOffset = Rotation2d.fromDegrees(-140.80068); 
         public static final Rotation2d backLeftModOffset = Rotation2d.fromDegrees(64.33596);
         public static final Rotation2d backRightModOffset = Rotation2d.fromDegrees(-89.4726);
-
-        // You may want to change this value.
-        public static final int driveCurrentLimitAmps = 70;
-        public static final double brownoutVoltage = 6.25;
         
         // These values should be fine, but if the modules start to rattle you may want to play with the steer PID values.
         public static final double drivekP = 0.13;//0.005;
@@ -160,6 +161,13 @@ public class Constants {
     }
 
     public static final class AutoConstants {
+        //Auto Shooter Times
+        public static final double LONG_DURATION_SHOOT_TIME = 10.0;
+        public static final double SHORT_DURATION_SHOOT_TIME = 2.5;
+
+        //Auto Agitator Times
+        public static final double LONG_DURATION_AGITATE_TIME = 10.0;
+        public static final double SHORT_DURATION_AGITATE_TIME = 2.5;
 
         // These drive and rotation PID constants most likely need to be tuned for better accuracy.
         public static final double drivekP = 2.0 * 4.0; // 12.8
@@ -211,7 +219,7 @@ public class Constants {
     }
 
     public class ShooterConstants {
-        
+        public static final double SHOOTER_RPM_TOLERANCE = 50.0; // +/- 50 RPM is “on target”
         public static final double shooterRPM = 4000;
 
         public static final double shooterkP = 0;
